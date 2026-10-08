@@ -1,0 +1,95 @@
+﻿<Window x:Class="mipet.CharacterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="mipet 캐릭터 수정"
+        Width="460" SizeToContent="Height"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Topmost="True">
+
+    <StackPanel Margin="20">
+        <TextBlock Text="캐릭터 이미지" FontWeight="Bold" FontSize="14"/>
+        <TextBlock Text="PNG(배경 투명) 권장. 이미지끼리 캔버스 크기를 같게 만들어 주세요."
+                   Foreground="Gray" Margin="0,2,0,10" TextWrapping="Wrap"/>
+
+        <Grid Margin="0,4,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="앉은 몸통" VerticalAlignment="Center"/>
+            <TextBlock x:Name="SittingLabel" Grid.Column="1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="Gray"/>
+            <Button Grid.Column="2" Content="파일 선택" Tag="Sitting" Padding="8,2" Margin="6,0,0,0" Click="Pick_Click"/>
+            <Button Grid.Column="3" Content="기본" Tag="Sitting" Padding="8,2" Margin="4,0,0,0" Click="Clear_Click"/>
+        </Grid>
+
+        <Grid Margin="0,6,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="눈 뜬 머리" VerticalAlignment="Center"/>
+            <TextBlock x:Name="HeadOpenLabel" Grid.Column="1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="Gray"/>
+            <Button Grid.Column="2" Content="파일 선택" Tag="HeadOpen" Padding="8,2" Margin="6,0,0,0" Click="Pick_Click"/>
+            <Button Grid.Column="3" Content="기본" Tag="HeadOpen" Padding="8,2" Margin="4,0,0,0" Click="Clear_Click"/>
+        </Grid>
+
+        <Grid Margin="0,6,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="눈 감은 머리" VerticalAlignment="Center"/>
+            <TextBlock x:Name="HeadClosedLabel" Grid.Column="1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="Gray"/>
+            <Button Grid.Column="2" Content="파일 선택" Tag="HeadClosed" Padding="8,2" Margin="6,0,0,0" Click="Pick_Click"/>
+            <Button Grid.Column="3" Content="기본" Tag="HeadClosed" Padding="8,2" Margin="4,0,0,0" Click="Clear_Click"/>
+        </Grid>
+
+        <Grid Margin="0,6,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="잡힌 모습" VerticalAlignment="Center"/>
+            <TextBlock x:Name="GrabbedLabel" Grid.Column="1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="Gray"/>
+            <Button Grid.Column="2" Content="파일 선택" Tag="Grabbed" Padding="8,2" Margin="6,0,0,0" Click="Pick_Click"/>
+            <Button Grid.Column="3" Content="기본" Tag="Grabbed" Padding="8,2" Margin="4,0,0,0" Click="Clear_Click"/>
+        </Grid>
+
+        <Grid Margin="0,6,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="떨어지는 모습" VerticalAlignment="Center"/>
+            <TextBlock x:Name="FallingLabel" Grid.Column="1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="Gray"/>
+            <Button Grid.Column="2" Content="파일 선택" Tag="Falling" Padding="8,2" Margin="6,0,0,0" Click="Pick_Click"/>
+            <Button Grid.Column="3" Content="기본" Tag="Falling" Padding="8,2" Margin="4,0,0,0" Click="Clear_Click"/>
+        </Grid>
+
+        <Grid Margin="0,6,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="주저앉은 모습" VerticalAlignment="Center"/>
+            <TextBlock x:Name="LandedLabel" Grid.Column="1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="Gray"/>
+            <Button Grid.Column="2" Content="파일 선택" Tag="Landed" Padding="8,2" Margin="6,0,0,0" Click="Pick_Click"/>
+            <Button Grid.Column="3" Content="기본" Tag="Landed" Padding="8,2" Margin="4,0,0,0" Click="Clear_Click"/>
+        </Grid>
+
+        <Button Content="모두 기본 이미지로 되돌리기" Margin="0,18,0,0" Padding="8,4" Click="ResetAll_Click"/>
+    </StackPanel>
+</Window>
