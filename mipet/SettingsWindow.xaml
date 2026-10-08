@@ -1,0 +1,33 @@
+﻿<Window x:Class="mipet.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="mipet 설정"
+        Width="380" SizeToContent="Height"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Topmost="True">
+
+    <StackPanel Margin="20">
+
+        <TextBlock Text="캐릭터 크기" FontWeight="Bold"/>
+        <Slider x:Name="ScaleSlider" Minimum="0.3" Maximum="2"
+                ValueChanged="Slider_ValueChanged"/>
+
+        <TextBlock Text="흔들림 민감도" FontWeight="Bold" Margin="0,12,0,0"/>
+        <Slider x:Name="FlingSlider" Minimum="0.05" Maximum="1.5"
+                ValueChanged="Slider_ValueChanged"/>
+
+        <TextBlock Text="최대 기울기 (도)" FontWeight="Bold" Margin="0,12,0,0"/>
+        <Slider x:Name="MaxAngleSlider" Minimum="5" Maximum="80"
+                ValueChanged="Slider_ValueChanged"/>
+
+        <CheckBox x:Name="ReverseCheck" Content="쏠리는 방향 반대로" Margin="0,14,0,0"
+                  Checked="Check_Changed" Unchecked="Check_Changed"/>
+
+        <CheckBox x:Name="AutoStartCheck" Content="Windows 시작 시 자동 실행" Margin="0,8,0,0"
+                  Checked="AutoStart_Changed" Unchecked="AutoStart_Changed"/>
+
+        <Button Content="기본값으로 되돌리기" Margin="0,18,0,0" Padding="8,4"
+                Click="Reset_Click"/>
+    </StackPanel>
+</Window>

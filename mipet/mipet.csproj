@@ -6,6 +6,25 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+	<ApplicationIcon>mipet.ico</ApplicationIcon>
   </PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="Assets\body_falling_original.png" />
+		<None Remove="Assets\body_grabbed_original.png" />
+		<None Remove="Assets\body_landed_original.png" />
+		<None Remove="Assets\body_sitting_original.png" />
+		<None Remove="Assets\head_closed_original.png" />
+		<None Remove="Assets\head_open_original.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="Assets\body_falling_original.png" />
+		<Resource Include="Assets\body_grabbed_original.png" />
+		<Resource Include="Assets\body_landed_original.png" />
+		<Resource Include="Assets\body_sitting_original.png" />
+		<Resource Include="Assets\head_closed_original.png" />
+		<Resource Include="Assets\head_open_original.png" />
+	</ItemGroup>
 
 </Project>
