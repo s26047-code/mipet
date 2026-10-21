@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -20,7 +21,10 @@ namespace mipet
     {
         private PetState _state = PetState.Sitting;
 
-        private PetSettings _settings = PetSettings.Load();
+        private PetSettings _settings;
+        private Action _saveAll;
+        private Action _showList;
+        private Action<PetSettings> _hidePet;
         private SettingsWindow? _settingsWindow;
         private CharacterWindow? _characterWindow;
         private const double BaseSize = 300;
@@ -83,8 +87,12 @@ namespace mipet
 
         private string _imageKey = "";
 
-        public MainWindow()
+        public MainWindow(PetSettings settings, Action saveAll, Action showList, Action<PetSettings> hidePet)
         {
+            _settings = settings;
+            _saveAll = saveAll;
+            _showList = showList;
+            _hidePet = hidePet;
             InitializeComponent();
 
             _sittingBody = LoadResourceImage("Assets/body_sitting_original.png");
@@ -109,6 +117,8 @@ namespace mipet
             };
 
             CompositionTarget.Rendering += OnRendering;
+            SourceInitialized += (_, _) => TopmostHelper.Keep(this);
+            Closed += (_, _) => CompositionTarget.Rendering -= OnRendering;
         }
 
         // ---------- 이미지 불러오기 ----------
@@ -161,6 +171,7 @@ namespace mipet
         private void ApplySettings()
         {
             ReloadImages();
+            ApplyImageLayerOrder();
 
             double size = BaseSize * _settings.Scale;
             Root.Width = size;
@@ -171,6 +182,12 @@ namespace mipet
                 UpdateLayout();
                 Top = GroundTop();
             }
+        }
+
+        private void ApplyImageLayerOrder()
+        {
+            Panel.SetZIndex(BodyImage, _settings.HeadOnTop ? 0 : 1);
+            Panel.SetZIndex(HeadImage, _settings.HeadOnTop ? 1 : 0);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -360,7 +377,7 @@ namespace mipet
             _settingsWindow.Closed += (s, args) =>
             {
                 _settingsWindow = null;
-                _settings.Save();
+                _saveAll();
             };
             _settingsWindow.Show();
         }
@@ -373,18 +390,22 @@ namespace mipet
                 return;
             }
 
-            _characterWindow = new CharacterWindow(_settings, ApplySettings);
+            _characterWindow = new CharacterWindow(_settings, ApplySettings, _saveAll);
             _characterWindow.Closed += (s, args) =>
             {
                 _characterWindow = null;
-                _settings.Save();
+                _saveAll();
             };
             _characterWindow.Show();
         }
 
+        private void MenuList_Click(object sender, RoutedEventArgs e) => _showList();
+
+        private void MenuHide_Click(object sender, RoutedEventArgs e) => _hidePet(_settings);
+
         private void MenuExit_Click(object sender, RoutedEventArgs e)
         {
-            _settings.Save();
+            _saveAll();
             Application.Current.Shutdown();
         }
 
