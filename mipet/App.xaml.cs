@@ -1,3 +1,4 @@
+using System.IO;
 using System.Threading;
 using System.Windows;
 
@@ -53,6 +54,50 @@ namespace mipet
             if (!string.IsNullOrWhiteSpace(name)) pet.Name = name.Trim();
             Save();
         }
+        public void DeletePet(PetSettings pet)
+        {
+            if (!_pets.Contains(pet)) return;
+
+            var remainingPets = _pets.Where(p => p.Id != pet.Id).ToList();
+            if (_windows.Remove(pet.Id, out var window)) window.Close();
+            _pets.Remove(pet);
+            Save();
+            DeleteUnusedProfileImages(pet, remainingPets);
+            _list?.RefreshPets(_pets);
+        }
+
+        private static void DeleteUnusedProfileImages(PetSettings deletedPet, IEnumerable<PetSettings> remainingPets)
+        {
+            string imageFolder = Path.GetFullPath(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "mipet", "images"));
+            string imageRoot = Path.TrimEndingDirectorySeparator(imageFolder) + Path.DirectorySeparatorChar;
+
+            foreach (string? path in GetImagePaths(deletedPet))
+            {
+                try
+                {
+                    if (string.IsNullOrWhiteSpace(path)) continue;
+                    string fullPath = Path.GetFullPath(path);
+                    if (!fullPath.StartsWith(imageRoot, StringComparison.OrdinalIgnoreCase)) continue;
+
+                    bool stillUsed = remainingPets
+                        .SelectMany(GetImagePaths)
+                        .Any(other => string.Equals(other, fullPath, StringComparison.OrdinalIgnoreCase));
+                    if (!stillUsed && File.Exists(fullPath)) File.Delete(fullPath);
+                }
+                catch { }
+            }
+        }
+
+        private static IEnumerable<string?> GetImagePaths(PetSettings pet)
+        {
+            yield return pet.SittingBodyPath;
+            yield return pet.HeadOpenPath;
+            yield return pet.HeadClosedPath;
+            yield return pet.GrabbedImagePath;
+            yield return pet.FallingImagePath;
+            yield return pet.LandedImagePath;
+        }
         public void ShowList()
         {
             EnsureList(); _list!.RefreshPets(_pets); _list.Show(); _list.Activate();
@@ -60,7 +105,7 @@ namespace mipet
         private void EnsureList()
         {
             if (_list != null) return;
-            _list = new CharacterListWindow(_pets, ShowPet, HidePet, AddPet, RenamePet);
+            _list = new CharacterListWindow(_pets, ShowPet, HidePet, AddPet, RenamePet, DeletePet);
         }
         private void Save() => PetSettings.SaveAll(_pets);
         protected override void OnExit(ExitEventArgs e)
