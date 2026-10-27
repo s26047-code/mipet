@@ -11,6 +11,7 @@ namespace mipet
         private PetSettings _settings;
         private Action _onChanged;
         private Action _save;
+        private bool _isShowingDialog;
 
         // 고른 이미지를 복사해서 보관하는 폴더: %AppData%\mipet\images
         private static string ImageFolder
@@ -26,6 +27,7 @@ namespace mipet
         public CharacterWindow(PetSettings settings, Action onChanged, Action save)
         {
             InitializeComponent();
+            Deactivated += (_, _) => { if (!_isShowingDialog) Close(); };
             _settings = settings;
             _onChanged = onChanged;
             _save = save;
@@ -97,7 +99,17 @@ namespace mipet
                 Filter = "이미지 파일|*.png;*.jpg;*.jpeg;*.bmp;*.gif|모든 파일|*.*"
             };
 
-            if (dialog.ShowDialog(this) != true) return;
+            bool? dialogResult;
+            _isShowingDialog = true;
+            try
+            {
+                dialogResult = dialog.ShowDialog(this);
+            }
+            finally
+            {
+                _isShowingDialog = false;
+            }
+            if (dialogResult != true) return;
 
             try
             {

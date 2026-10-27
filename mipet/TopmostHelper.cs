@@ -2,11 +2,10 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
-using System.Windows.Threading;
 
 namespace mipet
 {
-    // 캐릭터 창을 항상 다른 창보다 위에 유지
+    // 캐릭터 창을 일반 창보다 위에 유지하고, 앱이 정한 캐릭터 순서를 적용
     public static class TopmostHelper
     {
         [DllImport("user32.dll")]
@@ -33,12 +32,16 @@ namespace mipet
 
             int style = GetWindowLong(hwnd, GWL_EXSTYLE);
             SetWindowLong(hwnd, GWL_EXSTYLE, style | WS_EX_TOOLWINDOW);
+            BringToFront(window);
+        }
 
-            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-            timer.Tick += (_, _) => SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+        public static void BringToFront(Window window)
+        {
+            IntPtr hwnd = new WindowInteropHelper(window).Handle;
+            if (hwnd == IntPtr.Zero || !window.IsVisible) return;
+
+            SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-            timer.Start();
-            window.Closed += (_, _) => timer.Stop();
         }
     }
 }

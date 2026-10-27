@@ -1,6 +1,8 @@
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace mipet
 {
@@ -11,6 +13,7 @@ namespace mipet
         private readonly Dictionary<string, MainWindow> _windows = new();
         private List<PetSettings> _pets = new();
         private CharacterListWindow? _list;
+        private DispatcherTimer? _priorityTimer;
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -22,6 +25,12 @@ namespace mipet
             PetSettings.SaveAll(_pets);
             foreach (var pet in _pets.Where(p => p.IsVisible).ToArray()) ShowPet(pet);
             EnsureList();
+
+            _priorityTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+            _priorityTimer.Tick += (_, _) => ApplyPetPriority();
+            _priorityTimer.Start();
+            ApplyPetPriority();
+
             if (!_pets.Any(p => p.IsVisible)) ShowList();
         }
 
@@ -35,25 +44,36 @@ namespace mipet
                 window.Closed += (_, _) => _windows.Remove(pet.Id);
             }
             if (!window.IsVisible) window.Show();
-            window.Activate(); Save(); _list?.RefreshPets(_pets);
+            window.Activate();
+            Save();
+            ApplyPetPriority();
+            _list?.RefreshPets(_pets);
         }
+
         public void HidePet(PetSettings pet)
         {
             pet.IsVisible = false;
             if (_windows.TryGetValue(pet.Id, out var window)) window.Hide();
-            Save(); _list?.RefreshPets(_pets);
+            Save();
+            ApplyPetPriority();
+            _list?.RefreshPets(_pets);
             if (!_pets.Any(p => p.IsVisible)) Shutdown();
         }
+
         public void AddPet()
         {
             var pet = new PetSettings { Name = $"캐릭터 {_pets.Count + 1}", IsVisible = true };
-            _pets.Add(pet); Save(); ShowPet(pet);
+            _pets.Add(pet);
+            Save();
+            ShowPet(pet);
         }
+
         public void RenamePet(PetSettings pet, string name)
         {
             if (!string.IsNullOrWhiteSpace(name)) pet.Name = name.Trim();
             Save();
         }
+
         public void DeletePet(PetSettings pet)
         {
             if (!_pets.Contains(pet)) return;
@@ -64,6 +84,7 @@ namespace mipet
             Save();
             DeleteUnusedProfileImages(pet, remainingPets);
             _list?.RefreshPets(_pets);
+            ApplyPetPriority();
         }
 
         private static void DeleteUnusedProfileImages(PetSettings deletedPet, IEnumerable<PetSettings> remainingPets)
@@ -98,21 +119,47 @@ namespace mipet
             yield return pet.FallingImagePath;
             yield return pet.LandedImagePath;
         }
+
         public void ShowList()
         {
-            EnsureList(); _list!.RefreshPets(_pets); _list.Show(); _list.Activate();
+            EnsureList();
+            _list!.RefreshPets(_pets);
+            _list.Show();
+            _list.Activate();
         }
+
         private void EnsureList()
         {
             if (_list != null) return;
-            _list = new CharacterListWindow(_pets, ShowPet, HidePet, AddPet, RenamePet, DeletePet);
+            _list = new CharacterListWindow(
+                _pets, ShowPet, HidePet, AddPet, RenamePet, DeletePet,
+                () => { Save(); ApplyPetPriority(); });
         }
+
+        private void ApplyPetPriority()
+        {
+            if (_list?.IsVisible == true) return;
+            // 목록 첫 캐릭터가 맨 위에 오도록 뒤에서부터 차례로 올립니다.
+            foreach (var pet in _pets.AsEnumerable().Reverse())
+            {
+                if (pet.IsVisible &&
+                    _windows.TryGetValue(pet.Id, out var window) &&
+                    window.IsVisible)
+                {
+                    TopmostHelper.BringToFront(window);
+                }
+            }
+        }
+
         private void Save() => PetSettings.SaveAll(_pets);
+
         protected override void OnExit(ExitEventArgs e)
         {
+            _priorityTimer?.Stop();
             Save();
             if (_ownsMutex) _mutex?.ReleaseMutex();
-            _mutex?.Dispose(); base.OnExit(e);
+            _mutex?.Dispose();
+            base.OnExit(e);
         }
     }
 }
