@@ -138,7 +138,7 @@ namespace mipet
 
         private void ApplyPetPriority()
         {
-            if (_list?.IsVisible == true) return;
+            if (_list?.IsVisible == true || _windows.Values.Any(window => window.HasAuxiliaryWindowOpen)) return;
             // 목록 첫 캐릭터가 맨 위에 오도록 뒤에서부터 차례로 올립니다.
             foreach (var pet in _pets.AsEnumerable().Reverse())
             {

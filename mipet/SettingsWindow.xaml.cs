@@ -13,7 +13,22 @@ namespace mipet
         {
             InitializeComponent();
             Title = $"{settings.Name} 설정";
-            Deactivated += (_, _) => Close();
+            var deactivationTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(250)
+            };
+            deactivationTimer.Tick += (_, _) =>
+            {
+                deactivationTimer.Stop();
+                if (IsVisible && !IsActive) Close();
+            };
+            Deactivated += (_, _) =>
+            {
+                deactivationTimer.Stop();
+                deactivationTimer.Start();
+            };
+            Activated += (_, _) => deactivationTimer.Stop();
+            Closed += (_, _) => deactivationTimer.Stop();
             _settings = settings;
             _onChanged = onChanged;
             LoadToControls();
