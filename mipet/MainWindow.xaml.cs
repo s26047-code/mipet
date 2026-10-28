@@ -86,6 +86,7 @@ namespace mipet
         private BitmapImage _landedImage;
 
         private string _imageKey = "";
+        public bool HasAuxiliaryWindowOpen => _settingsWindow?.IsVisible == true || _characterWindow?.IsVisible == true;
 
         public MainWindow(PetSettings settings, Action saveAll, Action showList, Action<PetSettings> hidePet)
         {
