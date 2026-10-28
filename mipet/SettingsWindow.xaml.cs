@@ -12,6 +12,8 @@ namespace mipet
         public SettingsWindow(PetSettings settings, Action onChanged)
         {
             InitializeComponent();
+            Title = $"{settings.Name} 설정";
+            Deactivated += (_, _) => Close();
             _settings = settings;
             _onChanged = onChanged;
             LoadToControls();

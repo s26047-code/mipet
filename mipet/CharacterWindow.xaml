@@ -12,6 +12,13 @@
         <TextBlock Text="PNG(배경 투명) 권장. 이미지끼리 캔버스 크기를 같게 만들어 주세요."
                    Foreground="Gray" Margin="0,2,0,10" TextWrapping="Wrap"/>
 
+        <TextBlock Text="겹쳐 보이는 순서" FontWeight="Bold" Margin="0,4,0,4"/>
+        <TextBlock x:Name="LayerOrderLabel" Foreground="Gray" Margin="0,0,0,6"/>
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <Button Content="몸통을 앞으로" Padding="8,3" Margin="0,0,6,0" Click="BodyToFront_Click"/>
+            <Button Content="머리를 앞으로" Padding="8,3" Click="HeadToFront_Click"/>
+        </StackPanel>
+
         <Grid Margin="0,4,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="90"/>

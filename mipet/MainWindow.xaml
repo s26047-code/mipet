@@ -1,4 +1,4 @@
-﻿<Window x:Class="mipet.MainWindow"
+<Window x:Class="mipet.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="mipet"
@@ -18,6 +18,8 @@
         <ContextMenu>
             <MenuItem Header="설정" Click="MenuSettings_Click"/>
             <MenuItem Header="캐릭터 수정" Click="MenuCharacter_Click"/>
+            <MenuItem Header="캐릭터 리스트" Click="MenuList_Click"/>
+            <MenuItem Header="숨기기" Click="MenuHide_Click"/>
             <Separator/>
             <MenuItem Header="프로그램 종료" Click="MenuExit_Click"/>
         </ContextMenu>

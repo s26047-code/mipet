@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +10,8 @@ namespace mipet
     {
         private PetSettings _settings;
         private Action _onChanged;
+        private Action _save;
+        private bool _isShowingDialog;
 
         // 고른 이미지를 복사해서 보관하는 폴더: %AppData%\mipet\images
         private static string ImageFolder
@@ -22,12 +24,40 @@ namespace mipet
             }
         }
 
-        public CharacterWindow(PetSettings settings, Action onChanged)
+        public CharacterWindow(PetSettings settings, Action onChanged, Action save)
         {
             InitializeComponent();
+            Deactivated += (_, _) => { if (!_isShowingDialog) Close(); };
             _settings = settings;
             _onChanged = onChanged;
+            _save = save;
             UpdateLabels();
+            UpdateLayerOrderLabel();
+        }
+
+        private void UpdateLayerOrderLabel()
+        {
+            LayerOrderLabel.Text = _settings.HeadOnTop
+                ? "현재 순서: 머리가 몸통보다 앞에 표시됩니다."
+                : "현재 순서: 몸통이 머리보다 앞에 표시됩니다.";
+        }
+
+        private void BodyToFront_Click(object sender, RoutedEventArgs e)
+        {
+            SetLayerOrder(headOnTop: false);
+        }
+
+        private void HeadToFront_Click(object sender, RoutedEventArgs e)
+        {
+            SetLayerOrder(headOnTop: true);
+        }
+
+        private void SetLayerOrder(bool headOnTop)
+        {
+            _settings.HeadOnTop = headOnTop;
+            UpdateLayerOrderLabel();
+            _onChanged();
+            _save();
         }
 
         private void UpdateLabels()
@@ -69,7 +99,17 @@ namespace mipet
                 Filter = "이미지 파일|*.png;*.jpg;*.jpeg;*.bmp;*.gif|모든 파일|*.*"
             };
 
-            if (dialog.ShowDialog(this) != true) return;
+            bool? dialogResult;
+            _isShowingDialog = true;
+            try
+            {
+                dialogResult = dialog.ShowDialog(this);
+            }
+            finally
+            {
+                _isShowingDialog = false;
+            }
+            if (dialogResult != true) return;
 
             try
             {
@@ -77,7 +117,7 @@ namespace mipet
                 Directory.CreateDirectory(ImageFolder);
                 string ext = Path.GetExtension(dialog.FileName);
                 string newPath = Path.Combine(ImageFolder,
-                    $"{key}_{DateTime.Now:yyyyMMddHHmmssfff}{ext}");
+                    $"{_settings.Id}_{key}_{Guid.NewGuid():N}{ext}");
                 File.Copy(dialog.FileName, newPath, true);
 
                 SetPath(key, newPath);
@@ -109,7 +149,7 @@ namespace mipet
 
             UpdateLabels();
             _onChanged();          // 화면에 반영 (새 이미지를 읽음)
-            _settings.Save();      // 바로 저장
+            _save();      // 바로 저장
 
             DeleteOldCopy(old);    // 이전에 복사해 둔 파일 정리
         }
@@ -131,7 +171,7 @@ namespace mipet
 
             UpdateLabels();
             _onChanged();
-            _settings.Save();
+            _save();
 
             foreach (var o in olds) DeleteOldCopy(o);
         }
