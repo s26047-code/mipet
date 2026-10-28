@@ -27,7 +27,24 @@ namespace mipet
         public CharacterWindow(PetSettings settings, Action onChanged, Action save)
         {
             InitializeComponent();
-            Deactivated += (_, _) => { if (!_isShowingDialog) Close(); };
+            var deactivationTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(250)
+            };
+            deactivationTimer.Tick += (_, _) =>
+            {
+                deactivationTimer.Stop();
+                if (!_isShowingDialog && IsVisible && !IsActive)
+                    Close();
+            };
+            Deactivated += (_, _) =>
+            {
+                if (_isShowingDialog) return;
+                deactivationTimer.Stop();
+                deactivationTimer.Start();
+            };
+            Activated += (_, _) => deactivationTimer.Stop();
+            Closed += (_, _) => deactivationTimer.Stop();
             _settings = settings;
             _onChanged = onChanged;
             _save = save;
