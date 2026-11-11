@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using Microsoft.Win32;
+using System.IO;
 
 namespace mipet
 {
@@ -27,7 +28,12 @@ namespace mipet
             try
             {
                 using var key = Registry.CurrentUser.OpenSubKey(RunKey, false);
-                return key?.GetValue(AppName) != null;
+                string? registeredPath = key?.GetValue(AppName) as string;
+
+                return string.Equals(
+                    registeredPath?.Trim('"'),
+                    ExePath,
+                    StringComparison.OrdinalIgnoreCase);
             }
             catch
             {
@@ -35,22 +41,41 @@ namespace mipet
             }
         }
 
-        // 등록(true) / 해제(false)
-        public static void SetEnabled(bool enable)
+        public static bool SetEnabled(bool enable, out string? error)
         {
+            error = null;
+
             try
             {
-                using var key = Registry.CurrentUser.OpenSubKey(RunKey, true);
-                if (key == null) return;
+                using var key = Registry.CurrentUser.CreateSubKey(RunKey, true);
+                if (key == null)
+                    throw new InvalidOperationException("자동 시작 레지스트리 키를 열 수 없습니다.");
 
                 if (enable)
-                    key.SetValue(AppName, "\"" + ExePath + "\"");   // 공백이 있는 경로도 안전하게 따옴표로 감쌈
+                {
+                    string exePath = ExePath;
+
+                    if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
+                        throw new FileNotFoundException("실행 중인 mipet.exe 경로를 찾을 수 없습니다.", exePath);
+
+                    string command = $"\"{exePath}\"";
+                    key.SetValue(AppName, command, RegistryValueKind.String);
+
+                    string? savedCommand = key.GetValue(AppName) as string;
+                    if (!string.Equals(savedCommand, command, StringComparison.OrdinalIgnoreCase))
+                        throw new InvalidOperationException("자동 시작 경로 저장을 확인하지 못했습니다.");
+                }
                 else
+                {
                     key.DeleteValue(AppName, false);
+                }
+
+                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                // 실패해도 프로그램은 계속 동작
+                error = ex.Message;
+                return false;
             }
         }
     }

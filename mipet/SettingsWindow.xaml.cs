@@ -66,7 +66,20 @@ namespace mipet
         {
             if (_loading) return;
 
-            AutoStart.SetEnabled(AutoStartCheck.IsChecked == true);
+            bool enable = AutoStartCheck.IsChecked == true;
+
+            if (AutoStart.SetEnabled(enable, out string? error))
+                return;
+
+            _loading = true;
+            AutoStartCheck.IsChecked = AutoStart.IsEnabled();
+            _loading = false;
+
+            MessageBox.Show(
+                $"자동 시작 설정에 실패했습니다.\n{error}",
+                "mipet",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
